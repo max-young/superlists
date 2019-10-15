@@ -62,7 +62,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 弗朗西斯访问首页
         # 页面中卡不到伊迪丝的清单
-        self.browser.get(self.liver_server_url)
+        self.browser.get(self.live_server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy beacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
@@ -71,7 +71,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 他不像伊迪丝那样兴趣盎然
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Buy milk')
-        inputbox.sned_keys(Keys.ENTER)
+        inputbox.send_keys(Keys.ENTER)
 
         # 弗朗西斯获得了他的唯一URL
         francis_list_url = self.browser.current_url
