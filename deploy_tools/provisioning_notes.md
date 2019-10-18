@@ -1,7 +1,16 @@
 配置新网站
 ========
 
-## 需要安装的包:
+## 本地需要的工具
+
+fabric==2.5
+patchwork==1.0.1
+
+## 服务器要求
+
+Ubuntu==16.0.4
+
+## 服务器需要安装的包:
 
 * nginx
 * Python 3
@@ -9,7 +18,6 @@
 * pip
 * virtualenv
 
-以Ubuntu16.04为例, 可以执行下面的安装:
 ```shell
 sudo apt-get install nginx git python3 python3-pip
 sudo pip3 install virtualenv
@@ -36,3 +44,10 @@ sudo pip3 install virtualenv
         - source
         - static
         - virtualenv
+
+## 最后
+
+一键安装, 在此文件路径下执行:
+```shell
+$ fab fab -H user@host deploy
+```
