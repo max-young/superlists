@@ -1,4 +1,5 @@
-import sys
+import os
+from unittest import skip
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
@@ -9,11 +10,14 @@ class NewVisitorTest(StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        for arg in sys.argv:
-            if 'liveserver' in arg:
-                cls.server_url = 'http://' + arg.split('=')[1]
-                cls.live_server_url = ''
-                return
+        import pdb
+        pdb.set_trace()
+        # 如果要指定测试host, 则这样测试: liveserver=[your host] manage.py test functional_tests
+        custom_server = os.environ.get('liveserver')
+        if custom_server:
+            cls.server_url = 'http://' + custom_server
+            cls.live_server_url = ''
+            return
         super().setUpClass()
         cls.server_url = cls.live_server_url
 
@@ -122,3 +126,20 @@ class NewVisitorTest(StaticLiveServerTestCase):
         inputbox.send_keys('testing\n')
         inputbox = self.browser.find_element_by_id('id_new_item')
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2, 270, delta=5)
+
+    @skip
+    def test_cannot_add_empty_list_items(self):
+        # 伊迪丝访问首页, 不小心提交了一个空待办事项
+        # 输入框中没输入内容, 她就按下了回车键
+
+        # 首页刷新了, 显示一个错误信息
+        # 提示待办事项不能为空
+
+        # 他输入一些文字, 然后再次提交, 这次没问题了
+
+        # 他有点儿调皮, 又提交了一个空待办事项
+
+        # 在清单页面她看到了一个类似的错误信息
+
+        # 输入文字之后就没有问题了
+        self.fail('write me!')
