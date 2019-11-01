@@ -49,5 +49,5 @@ sudo pip3 install virtualenv
 
 一键安装, 在此文件路径下执行:
 ```shell
-$ fab fab -H user@host deploy
+$ fab -H user@host deploy
 ```

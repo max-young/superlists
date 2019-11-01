@@ -18,16 +18,16 @@ def deploy(connection):
     # add ssh key to github
     if not exists(connection, '~/.ssh/id_rsa.pub'):
         connection.run('ssh-keygen -t rsa -b 4096 -C "{}"'.format(config['github']['Email']))
-    connection.run(
-        ('curl -u "{username}:{password}" '
-         '--data "{{\\"title\\":\\"{host}\\",\\"key\\":\\"`cat ~/.ssh/id_rsa.pub`\\"}}" '
-         'https://api.github.com/user/keys').format(
-             username=config['github']['Username'],
-             password=config['github']['Password'],
-             host=connection.host)
-    )
-    connection.run('ssh-keyscan github.com >> ~/.ssh/known_hosts')
+        connection.run(
+            ('curl -u "{username}:{password}" '
+            '--data "{{\\"title\\":\\"{host}\\",\\"key\\":\\"`cat ~/.ssh/id_rsa.pub`\\"}}" '
+            'https://api.github.com/user/keys').format(
+                username=config['github']['Username'],
+                password=config['github']['Password'],
+                host=connection.host)
+        )
     # get_latest_source
+    connection.run('ssh-keyscan github.com >> ~/.ssh/known_hosts')
     if exists(connection, source_folder + '/.git'):
         connection.run('cd {} && git fetch'.format(source_folder))
     else:
@@ -45,9 +45,13 @@ def deploy(connection):
         append(connection, secret_key_file, 'SECRET_KEY = "{}"'.format(key))
     append(connection, settings_path, '\nfrom .secret_key import SECRET_KEY')
     #  update_virtualenv
+    connection.run('sudo killall apt apt-get || true')
+    connection.run('sudo apt update')
+    connection.run('sudo apt install -y python3-pip')
+    connection.run('sudo pip3 install virtualenv')
     virtualenv_folder = source_folder + '/../virtualenv'
     if not exists(connection, virtualenv_folder + '/bin/pip'):
-        connection.run('virtualenv --python=python3 {}'.format(virtualenv_folder))
+        connection.run('virtualenv -p python3 {}'.format(virtualenv_folder))
     connection.run('{}/bin/pip install -r {}/requirements.txt'.format(virtualenv_folder, source_folder))
     #  update_static_files
     connection.run('cd {} && ../virtualenv/bin/python3 manage.py collectstatic --noinput'.format(source_folder))
@@ -65,7 +69,7 @@ def deploy(connection):
     connection.run('sudo service nginx reload')
     # start gunicorn
     connection.run(
-        'cd {} && sed "s/SITENAME/mm.mmflow.online/g" '.format(source_folder)
+        'cd {} && sed "s/SITENAME/mm.mmflow.online/g; s/USER/{}/g" '.format(source_folder, connection.user)
         + 'deploy_tools/gunicorn-systemd.template.service | '
         + 'sudo tee /lib/systemd/system/gunicorn-mm.mmflow.online.service')
     connection.run('sudo systemctl restart gunicorn-mm.mmflow.online')

@@ -6,5 +6,5 @@ Conflicts=shutdown
 [Service]
 Restart=on-failure
 User=max
-WorkingDirectory=/home/max/sites/SITENAME/source
-ExecStart=/home/max/sites/SITENAME/virtualenv/bin/gunicorn --bind unix:/tmp/SITENAME.socket superlists.wsgi:application
+WorkingDirectory=/home/USER/sites/SITENAME/source
+ExecStart=/home/USER/sites/SITENAME/virtualenv/bin/gunicorn --bind unix:/tmp/SITENAME.socket superlists.wsgi:application
