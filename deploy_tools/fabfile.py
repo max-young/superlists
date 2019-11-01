@@ -60,7 +60,8 @@ def deploy(connection):
     # start nginx
     connection.run('sudo apt-get install -y nginx')
     connection.run(
-        'cd {} && sed "s/SITENAME/mm.mmflow.online/g" deploy_tools/nginx.template.conf '.format(source_folder)
+        'cd {} && sed "s/SITENAME/mm.mmflow.online/g; s/USER/{}/g" '.format(source_folder, connection.user)
+        + 'deploy_tools/nginx.template.conf '
         + '| sudo tee /etc/nginx/sites-available/mm.mmflow.online')
     if not exists(connection, '/etc/nginx/sites-enabled/mm.mmflow.online'):
         connection.run('sudo ln -s /etc/nginx/sites-available/mm.mmflow.online '.format(source_folder)
@@ -72,4 +73,5 @@ def deploy(connection):
         'cd {} && sed "s/SITENAME/mm.mmflow.online/g; s/USER/{}/g" '.format(source_folder, connection.user)
         + 'deploy_tools/gunicorn-systemd.template.service | '
         + 'sudo tee /lib/systemd/system/gunicorn-mm.mmflow.online.service')
+    connection.run('sudo systemctl daemon-reload')
     connection.run('sudo systemctl restart gunicorn-mm.mmflow.online')
