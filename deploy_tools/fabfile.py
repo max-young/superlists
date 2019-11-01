@@ -1,23 +1,37 @@
+import configparser
 import random
 
 from fabric import task
 from patchwork.files import append, exists
 
-REPO_URL = 'git@github.com:max-young/superlists.git'
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 
 @task
 def deploy(connection):
     site_folder = '/home/{}/sites/{}'.format(connection.user, connection.host)
     source_folder = site_folder + '/source'
-    #  create_directory_structure_if_necessary
+    # create_directory_structure_if_necessary
     for subfolder in ('database', 'static', 'virtualenv', 'source'):
         connection.run('mkdir -p {}/{}'.format(site_folder, subfolder))
-    #  get_latest_source
+    # add ssh key to github
+    if not exists(connection, '~/.ssh/id_rsa.pub'):
+        connection.run('ssh-keygen -t rsa -b 4096 -C "{}"'.format(config['github']['Email']))
+    connection.run(
+        ('curl -u "{username}:{password}" '
+         '--data "{{\\"title\\":\\"{host}\\",\\"key\\":\\"`cat ~/.ssh/id_rsa.pub`\\"}}" '
+         'https://api.github.com/user/keys').format(
+             username=config['github']['Username'],
+             password=config['github']['Password'],
+             host=connection.host)
+    )
+    connection.run('ssh-keyscan github.com >> ~/.ssh/known_hosts')
+    # get_latest_source
     if exists(connection, source_folder + '/.git'):
         connection.run('cd {} && git fetch'.format(source_folder))
     else:
-        connection.run('git clone {} {}'.format(REPO_URL, source_folder))
+        connection.run('git clone {} {}'.format(config['github']['Repo'], source_folder))
     current_commit = connection.local('git log -n 1 --format=%H')
     connection.run('cd {} && git reset --hard {}'.format(source_folder, current_commit.stdout))
     #  update_settings
