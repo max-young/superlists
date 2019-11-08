@@ -1,7 +1,7 @@
 from django.urls import re_path, include
 import oauth2_provider.views as oauth2_views
 from django.conf import settings
-from .views import ApiEndpoint
+from .views import ApiEndpoint, secret_page
 
 # OAuth2 provider endpoints
 oauth2_endpoint_views = [
@@ -31,4 +31,5 @@ urlpatterns = [
     # OAuth 2 endpoints:
     re_path(r'^o/', include((oauth2_endpoint_views, 'oauth'), namespace="oauth2_provider")),
     re_path(r'^api/hello', ApiEndpoint.as_view()),  # an example resource endpoint
+    re_path(r'^secret$', secret_page, name='secret'),  # an example resource endpoint
 ]
